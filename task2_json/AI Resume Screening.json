@@ -1,0 +1,398 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "resume-screen",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cb159ab1-3d06-42c9-b359-57dcff3f8120",
+      "name": "Webhook",
+      "webhookId": "7e64b527-1aab-4a65-9789-c2407e799932"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "2739ec99-43ad-4fe3-9695-700e8b6b64e6",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9b0169ce-c927-44aa-b062-f8e9c7678d66",
+              "name": "job_requirements",
+              "value": "React, Node.js, MongoDB, JavaScript",
+              "type": "string"
+            },
+            {
+              "id": "8be85724-9ac9-48c8-b1a4-4a9b54070941",
+              "name": "minimum_match",
+              "value": "3",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "ed4f63e5-a913-42a9-bdf1-d2adc2b451d0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an HR resume screening assistant.\n\nJob requirements:\n{{$json.job_requirements}}\n\nMinimum required skill matches:\n{{$json.minimum_match}}\n\nResume content:\n{{$json.text}}\n\nAnalyze the resume against the job requirements.\n\nReturn exactly:\n\nDecision: Shortlisted or Rejected\nMatched Skills:\nMissing Skills:\nMatch Count:\nReason:",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        672,
+        0
+      ],
+      "id": "04835037-c4af-430a-8a82-ef3fa6287166",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        208
+      ],
+      "id": "472d68b6-74b0-4019-b5a4-e871409cc1aa",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qHf7mIzmBRGxVL3l",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d1b48193-6cbd-44ac-8c89-776b9d8db670",
+              "leftValue": "={{$json.text}}",
+              "rightValue": "Shortlisted",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "f0d36f8a-55cb-4bfe-8b5d-ba801b0b0039",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "6uaP0CKsSPObgGcL",
+          "mode": "list",
+          "cachedResultName": "resume_screening_results",
+          "cachedResultUrl": "/projects/Szo6Z8kTB3TQWCGc/datatables/6uaP0CKsSPObgGcL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "decision": "Shortlisted",
+            "ai_result": "={{$json.text}}",
+            "matched_skills": "React, Node.js, MongoDB, JavaScript",
+            "missing_skills": "none",
+            "match_count": "4"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ai_result",
+              "displayName": "ai_result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "matched_skills",
+              "displayName": "matched_skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "missing_skills",
+              "displayName": "missing_skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "match_count",
+              "displayName": "match_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        -80
+      ],
+      "id": "1a46bc28-31ac-4103-be7f-a399200b0ff1",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "6uaP0CKsSPObgGcL",
+          "mode": "list",
+          "cachedResultName": "resume_screening_results",
+          "cachedResultUrl": "/projects/Szo6Z8kTB3TQWCGc/datatables/6uaP0CKsSPObgGcL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "decision": "Rejected",
+            "ai_result": "={{$json.text}}",
+            "matched_skills": "Not available",
+            "missing_skills": "Not available",
+            "match_count": "0"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ai_result",
+              "displayName": "ai_result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "matched_skills",
+              "displayName": "matched_skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "missing_skills",
+              "displayName": "missing_skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "match_count",
+              "displayName": "match_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        96
+      ],
+      "id": "8beb7c70-99f3-4e59-9d3d-3c6373bf4a62",
+      "name": "Insert row1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "27cd069f-a04c-4d17-b126-3c68adc9ba27",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "994bc0830c83fd6d18a5b1d7c78565512773a0763878a910d377f6caaa23ef8b"
+  },
+  "nodeGroups": [],
+  "id": "MW80dz9ZmuOxrNzF",
+  "tags": []
+}

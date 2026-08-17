@@ -1,0 +1,215 @@
+{
+  "name": "Duplicate Person Detector",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "check-duplicates",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "57cc5887-fbce-4ec5-876d-7ae37036076b",
+      "name": "Webhook",
+      "webhookId": "d8463a94-6293-4bdd-b581-3146fc8d0eff"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        0
+      ],
+      "id": "33f2d569-7675-4849-9877-cbc741fd6a4d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "wPR5u1lhwTgK6X27",
+          "mode": "list",
+          "cachedResultName": "duplicate",
+          "cachedResultUrl": "/projects/Szo6Z8kTB3TQWCGc/datatables/wPR5u1lhwTgK6X27"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $json.email }}"
+            },
+            {
+              "keyName": "phone",
+              "keyValue": "={{ $json.phone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        0
+      ],
+      "id": "156ce06c-ea0b-4e60-b57a-745d7217007b",
+      "name": "If row exists"
+    },
+    {
+      "parameters": {
+        "fromEmail": "nishantsengar17@gmail.com",
+        "toEmail": "nishatsengar07@gmail.com",
+        "subject": "Duplicate Person Detected",
+        "html": "=A duplicate person was detected.\n\nName: {{ $json.full_name }}\nEmail: {{$json.email}}\nPhone: {{$json.phone}}\n\nThis person already exists in the database.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        928,
+        0
+      ],
+      "id": "9e17a18d-9ee8-4efe-9f26-487f9e4d9148",
+      "name": "Send an Email",
+      "webhookId": "5c75b702-7cf7-4b7f-8495-96edd215306f",
+      "credentials": {
+        "smtp": {
+          "id": "T2ybuAx24ObbIAsn",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "wPR5u1lhwTgK6X27",
+          "mode": "list",
+          "cachedResultName": "duplicate",
+          "cachedResultUrl": "/projects/Szo6Z8kTB3TQWCGc/datatables/wPR5u1lhwTgK6X27"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "full_name": "={{ $json['Full Name'] }}",
+            "email": "={{ $json.Email }}",
+            "phone": "={{ $json.Phone }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "7b52f4d8-f636-49ef-8eb3-c5203d9784f2",
+      "name": "Insert row"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If row exists": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "If row exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b7e08abb-99df-41f8-9e87-7a1ec57862e3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "994bc0830c83fd6d18a5b1d7c78565512773a0763878a910d377f6caaa23ef8b"
+  },
+  "nodeGroups": [],
+  "id": "EYGrRuwOviJZUglR",
+  "tags": []
+}
