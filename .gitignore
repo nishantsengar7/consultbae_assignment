@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+venv/
+.env
+.DS_Store
+task3_audio_app/uploads/*.wav
+task3_audio_app/uploads/*.mp3
+task3_audio_app/uploads/*.m4a
+task3_audio_app/uploads/*.ogg
+task3_audio_app/uploads/*.webm
