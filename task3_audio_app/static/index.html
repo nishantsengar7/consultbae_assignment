@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConsultBae — Submit Audio</title>
+  <meta name="description" content="Submit your voice introduction to ConsultBae's talent network. Record in-browser or upload an audio file." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    
+    :root {
+      --bg:          #0d0f1a;
+      --surface:     #151928;
+      --surface2:    #1e2336;
+      --border:      #2a3052;
+      --accent:      #6c63ff;
+      --accent2:     #a78bfa;
+      --success:     #10b981;
+      --danger:      #ef4444;
+      --warning:     #f59e0b;
+      --text:        #e2e8f0;
+      --muted:       #8892b0;
+      --radius:      12px;
+      --radius-sm:   8px;
+      --shadow:      0 8px 32px rgba(0,0,0,0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .logo {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 12px;
+    }
+    header h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 10px;
+      max-width: 440px;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+    nav a {
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all .2s;
+    }
+    nav a.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    nav a:not(.active) {
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    nav a:not(.active):hover {
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .field { margin-bottom: 22px; }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      padding: 12px 16px;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,.18);
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .mode-toggle button {
+      flex: 1;
+      padding: 11px 0;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      letter-spacing: .4px;
+    }
+    .mode-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    #recorder-panel, #upload-panel { display: none; }
+    #recorder-panel.visible, #upload-panel.visible { display: block; }
+
+    #waveform {
+      width: 100%;
+      height: 72px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    #timer {
+      font-size: 36px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+      text-align: center;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    #timer.recording { color: var(--danger); }
+
+    .rec-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-record {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all .2s ease;
+    }
+    .btn-record:disabled {
+      opacity: 0.35 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    #btn-start {
+      background: var(--accent);
+      color: #fff;
+    }
+    #btn-start:hover:not(:disabled) {
+      background: #5b53e8;
+      transform: translateY(-1px);
+    }
+    #btn-stop {
+      background: var(--danger);
+      color: #fff;
+    }
+    #btn-stop:not(:disabled) {
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
+    }
+    #btn-stop:hover:not(:disabled) {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+    #btn-replay {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    #btn-replay:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    .rec-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    #audio-preview {
+      width: 100%;
+      margin-top: 14px;
+      border-radius: var(--radius-sm);
+      display: none;
+      accent-color: var(--accent);
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(108,99,255,.06);
+    }
+    .drop-zone svg { color: var(--muted); margin-bottom: 10px; }
+    .drop-zone p { color: var(--muted); font-size: 13px; }
+    .drop-zone p span { color: var(--accent2); font-weight: 600; cursor: pointer; }
+    #file-chosen { font-size: 13px; color: var(--success); margin-top: 10px; display: none; }
+    #file-input { display: none; }
+
+    #btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity .2s, transform .2s;
+      letter-spacing: .5px;
+    }
+    #btn-submit:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    #btn-submit:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      z-index: 999;
+      max-width: 440px;
+      text-align: center;
+      white-space: pre-wrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: var(--success); color: var(--success); }
+    #toast.error   { border-color: var(--danger);  color: var(--danger);  }
+
+    #result-card {
+      display: none;
+      margin-top: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--success);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+    }
+    #result-card h3 { font-size: 14px; color: var(--success); margin-bottom: 12px; }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .meta-item { font-size: 12px; color: var(--muted); }
+    .meta-item span { display: block; font-size: 15px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ConsultBae</div>
+  <h1>Voice Introduction</h1>
+  <p>Submit your audio intro to join our talent network. Record in-browser or upload a file.</p>
+</header>
+
+<nav>
+  <a href="/static/index.html" class="active">Submit</a>
+  <a href="/static/submissions.html">View Submissions</a>
+</nav>
+
+<div class="card">
+  <div class="field">
+    <label for="name">Full Name</label>
+    <input id="name" type="text" placeholder="e.g. Tanvi Gupta" autocomplete="name" />
+  </div>
+  <div class="field">
+    <label for="phone">Phone Number</label>
+    <input id="phone" type="tel" placeholder="+91 90000 00000  or  9000000000" autocomplete="tel" />
+  </div>
+
+  <hr class="divider" />
+
+  <label>Audio Submission</label>
+  <div class="mode-toggle">
+    <button id="btn-mode-record" class="active" onclick="setMode('record')">🎙 Record Now</button>
+    <button id="btn-mode-upload" onclick="setMode('upload')">📁 Upload File</button>
+  </div>
+
+  <div id="recorder-panel" class="visible">
+    <canvas id="waveform"></canvas>
+    <div id="timer">0:00</div>
+    <div class="rec-controls">
+      <button id="btn-start" class="btn-record" type="button" onclick="startRecording()">
+        <span>🎙 Start Recording</span>
+      </button>
+      <button id="btn-stop" class="btn-record" type="button" disabled onclick="stopRecording()">
+        <span class="rec-dot"></span>
+        <span>⏹ Stop Recording</span>
+      </button>
+      <button id="btn-replay" class="btn-record" type="button" style="display: none;" onclick="replayRecording()">
+        <span>▶ Replay</span>
+      </button>
+    </div>
+    <audio id="audio-preview" controls></audio>
+  </div>
+
+  <div id="upload-panel">
+    <div class="drop-zone" id="drop-zone"
+         onclick="document.getElementById('file-input').click()"
+         ondragover="onDragOver(event)"
+         ondragleave="onDragLeave(event)"
+         ondrop="onDrop(event)">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 3v12m0 0l-4-4m4 4l4-4M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/>
+      </svg>
+      <p>Drag & drop your file here, or <span>browse</span></p>
+      <p style="margin-top:6px;font-size:11px">MP3, WAV, M4A, OGG, WEBM — max 50 MB</p>
+    </div>
+    <div id="file-chosen"></div>
+    <input type="file" id="file-input" accept=".mp3,.wav,.m4a,.ogg,.webm"
+           onchange="onFileChosen(this)" />
+  </div>
+
+  <hr class="divider" />
+
+  <button id="btn-submit" disabled onclick="handleSubmit()">Submit Introduction</button>
+
+  <div id="result-card">
+    <h3>✓ Submission Received</h3>
+    <div class="meta-grid" id="meta-grid"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+
+let mode = 'record';            
+let mediaRecorder = null;
+let audioChunks   = [];
+let recordedBlob  = null;
+let uploadedFile  = null;
+let timerInterval = null;
+let timerSec      = 0;
+let audioCtx      = null;
+let analyser      = null;
+let animFrame     = null;
+let stream        = null;
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('recorder-panel').classList.toggle('visible', m === 'record');
+  document.getElementById('upload-panel').classList.toggle('visible',   m === 'upload');
+  document.getElementById('btn-mode-record').classList.toggle('active', m === 'record');
+  document.getElementById('btn-mode-upload').classList.toggle('active', m === 'upload');
+  refreshSubmitState();
+}
+
+function refreshSubmitState() {
+  const hasName  = document.getElementById('name').value.trim().length > 0;
+  const hasPhone = document.getElementById('phone').value.trim().length > 0;
+  const hasAudio = (mode === 'record' && recordedBlob) || (mode === 'upload' && uploadedFile);
+  document.getElementById('btn-submit').disabled = !(hasName && hasPhone && hasAudio);
+}
+
+document.getElementById('name').addEventListener('input', refreshSubmitState);
+document.getElementById('phone').addEventListener('input', refreshSubmitState);
+
+function startTimer() {
+  timerSec = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => { timerSec++; updateTimerDisplay(); }, 1000);
+}
+function stopTimer() { clearInterval(timerInterval); }
+function updateTimerDisplay() {
+  const m = Math.floor(timerSec / 60).toString();
+  const s = (timerSec % 60).toString().padStart(2, '0');
+  document.getElementById('timer').textContent = `${m}:${s}`;
+}
+
+function startVisualiser(srcStream) {
+  audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+  analyser  = audioCtx.createAnalyser();
+  analyser.fftSize = 512;
+  const source = audioCtx.createMediaStreamSource(srcStream);
+  source.connect(analyser);
+
+  const canvas = document.getElementById('waveform');
+  const ctx2d  = canvas.getContext('2d');
+  const bufLen = analyser.frequencyBinCount;
+  const data   = new Uint8Array(bufLen);
+
+  function draw() {
+    animFrame = requestAnimationFrame(draw);
+    analyser.getByteTimeDomainData(data);
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    ctx2d.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface2').trim();
+    ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx2d.lineWidth   = 2;
+    ctx2d.strokeStyle = '#6c63ff';
+    ctx2d.shadowColor = '#6c63ff';
+    ctx2d.shadowBlur  = 8;
+    ctx2d.beginPath();
+    const sliceW = canvas.width / bufLen;
+    let x = 0;
+    for (let i = 0; i < bufLen; i++) {
+      const v = data[i] / 128.0;
+      const y = v * canvas.height / 2;
+      i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
+      x += sliceW;
+    }
+    ctx2d.stroke();
+  }
+  draw();
+}
+
+function stopVisualiser() {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  if (audioCtx)  audioCtx.close();
+  
+  const canvas = document.getElementById('waveform');
+  const ctx2d  = canvas.getContext('2d');
+  ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+async function startRecording() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) {
+    showToast('Microphone access denied. Please allow it in your browser settings.', 'error');
+    return;
+  }
+
+  audioChunks  = [];
+  recordedBlob = null;
+
+  const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus'
+    : MediaRecorder.isTypeSupported('audio/webm')
+      ? 'audio/webm'
+      : '';
+
+  mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = () => {
+    const ext  = mimeType.includes('webm') ? 'webm' : 'ogg';
+    recordedBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
+    recordedBlob._filename = `recording.${ext}`;     
+
+    const url = URL.createObjectURL(recordedBlob);
+    const preview = document.getElementById('audio-preview');
+    preview.src   = url;
+    preview.style.display = 'block';
+
+    const btnReplay = document.getElementById('btn-replay');
+    btnReplay.style.display = 'inline-flex';
+
+    stopVisualiser();
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+    }
+    refreshSubmitState();
+  };
+
+  mediaRecorder.start(250);   
+  startTimer();
+  startVisualiser(stream);
+
+  document.getElementById('timer').classList.add('recording');
+
+  const btnStart  = document.getElementById('btn-start');
+  const btnStop   = document.getElementById('btn-stop');
+  const btnReplay = document.getElementById('btn-replay');
+
+  btnStart.disabled = true;
+  btnStart.innerHTML = '<span>🎙 Recording...</span>';
+  btnStop.disabled = false;
+  btnReplay.style.display = 'none';
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+    stopTimer();
+    document.getElementById('timer').classList.remove('recording');
+
+    const btnStart = document.getElementById('btn-start');
+    const btnStop  = document.getElementById('btn-stop');
+
+    btnStart.disabled = false;
+    btnStart.innerHTML = '<span>🎙 Record Again</span>';
+    btnStop.disabled = true;
+  }
+}
+
+function replayRecording() {
+  const preview = document.getElementById('audio-preview');
+  preview.currentTime = 0;
+  preview.play();
+}
+
+function onFileChosen(input) {
+  uploadedFile = input.files[0] || null;
+  const el = document.getElementById('file-chosen');
+  if (uploadedFile) {
+    const mb = (uploadedFile.size / 1048576).toFixed(2);
+    el.textContent = `✓ ${uploadedFile.name}  (${mb} MB)`;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+  refreshSubmitState();
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('dragover');
+}
+function onDragLeave(e) {
+  document.getElementById('drop-zone').classList.remove('dragover');
+}
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) {
+    document.getElementById('file-input').files = e.dataTransfer.files;
+    onFileChosen(document.getElementById('file-input'));
+  }
+}
+
+async function handleSubmit() {
+  const name  = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const btn   = document.getElementById('btn-submit');
+
+  let audioFile = null;
+  if (mode === 'record') {
+    if (!recordedBlob) { showToast('Please record your audio first.', 'error'); return; }
+    audioFile = new File([recordedBlob], recordedBlob._filename || 'recording.webm',
+                         { type: recordedBlob.type });
+  } else {
+    if (!uploadedFile) { showToast('Please choose a file to upload.', 'error'); return; }
+    audioFile = uploadedFile;
+  }
+
+  const fd = new FormData();
+  fd.append('name',  name);
+  fd.append('phone', phone);
+  fd.append('audio', audioFile, audioFile.name);
+
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    const res  = await fetch('/submit', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.detail || `Server error ${res.status}`);
+    }
+
+    const m = data.meta || {};
+    const grid = document.getElementById('meta-grid');
+    grid.innerHTML = `
+      <div class="meta-item">Duration<span>${m.duration_sec != null ? m.duration_sec.toFixed(1) + 's' : 'N/A'}</span></div>
+      <div class="meta-item">Sample Rate<span>${m.sample_rate_hz != null ? (m.sample_rate_hz/1000).toFixed(1) + ' kHz' : 'N/A'}</span></div>
+      <div class="meta-item">Bitrate<span>${m.bitrate_kbps != null ? m.bitrate_kbps.toFixed(0) + ' kbps' : 'N/A'}</span></div>
+      <div class="meta-item">Loudness (dBFS)<span>${m.loudness_dbfs != null ? m.loudness_dbfs.toFixed(1) + ' dB' : 'N/A'}</span></div>
+      <div class="meta-item">Noise Est.<span>${m.noise_estimate != null ? m.noise_estimate.toFixed(1) + ' dB' : 'N/A'}</span></div>
+      <div class="meta-item">Person ID<span>#${data.person_id}</span></div>
+    `;
+    document.getElementById('result-card').style.display = 'block';
+    showToast('Submission received! ✓', 'success');
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+    btn.disabled    = false;
+    btn.textContent = 'Submit Introduction';
+  } finally {
+    btn.textContent = 'Submit Introduction';
+    
+  }
+}
+
+let toastTimeout;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = `show ${type}`;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => el.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
