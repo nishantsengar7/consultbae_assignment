@@ -1,25 +1,3 @@
-"""
-merge_pipeline.py
-=================
-Task 1: Merge three messy CSV files from different recruitment systems into
-a single clean SQLite database using Union-Find entity resolution.
-
-Design philosophy:
-  - Normalise first, match second: all identifier normalisation happens
-    before any comparison so the matching logic stays simple.
-  - Union-Find (disjoint set union) lets us handle transitive links
-    (A~B and B~C => A,B,C are one person) without pairwise joins.
-  - Fuzzy name+city is only a flag, never an auto-merge: it goes to
-    needs_review so a human decides.
-  - Ambiguous data (CTC unit mismatch, rate unit mismatch) is flagged
-    with a boolean; the raw value is left intact.
-  - Every raw source row is stored as JSON in source_records so every
-    merge decision is fully traceable.
-
-Dependencies:
-    pip install rapidfuzz
-"""
-
 import csv
 import json
 import re

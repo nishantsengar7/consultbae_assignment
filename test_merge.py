@@ -1,14 +1,3 @@
-"""
-test_merge.py
-==============
-Comprehensive Test Suite for Task 1: Entity Resolution & Merge Pipeline
-Includes:
-  1. Unit Tests for Normalization (email, phone, city, name, date, CTC/rate flags)
-  2. Data Ingestion & Edge-Case Handling Tests (blank rows, repeated headers, shifted columns)
-  3. Union-Find Disjoint Set & Transitive Resolution Tests
-  4. End-to-End Pipeline Execution & SQLite Database Integrity Tests
-"""
-
 import sys
 import unittest
 import sqlite3

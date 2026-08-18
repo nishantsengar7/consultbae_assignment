@@ -633,7 +633,15 @@ async function handleSubmit() {
   btn.textContent = 'Submitting…';
 
   try {
-    const res  = await fetch('/submit', { method: 'POST', body: fd });
+    let res;
+    try {
+      res = await fetch('/api/submit', { method: 'POST', body: fd });
+      if (res.status === 404) {
+        res = await fetch('/submit', { method: 'POST', body: fd });
+      }
+    } catch (e) {
+      res = await fetch('/submit', { method: 'POST', body: fd });
+    }
     const data = await res.json();
 
     if (!res.ok) {

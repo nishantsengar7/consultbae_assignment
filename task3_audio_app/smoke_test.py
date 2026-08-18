@@ -1,7 +1,3 @@
-"""
-Smoke tests for Task 3 API.
-Run from task3_audio_app/ directory while the server is running on :8000.
-"""
 import wave, struct, math, os, requests, json
 
 BASE = "http://127.0.0.1:8000"

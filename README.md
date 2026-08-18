@@ -4,6 +4,19 @@ A production-grade candidate entity resolution pipeline, n8n duplicate detection
 
 ---
 
+## 🌐 Live Deployment & Interactive Demo (Task 3)
+
+The Mini Audio Collection Web Application is live and running on Render:
+
+| Service / View | Live Production URL |
+| :--- | :--- |
+| **🎙️ Applicant Voice Portal** | [https://consultbae-assignment.onrender.com/static/index.html](https://consultbae-assignment.onrender.com/static/index.html) |
+| **📊 Recruiter Submissions Dashboard** | [https://consultbae-assignment.onrender.com/static/submissions.html](https://consultbae-assignment.onrender.com/static/submissions.html) |
+| **📑 Interactive API Documentation (Swagger)** | [https://consultbae-assignment.onrender.com/docs](https://consultbae-assignment.onrender.com/docs) |
+| **📈 Live Stats Endpoint (JSON)** | [https://consultbae-assignment.onrender.com/stats](https://consultbae-assignment.onrender.com/stats) |
+
+---
+
 ## 📌 Project Overview
 
 This repository contains the complete implementation for the ConsultBae AI Automation technical assessment across all 5 tasks:
@@ -194,13 +207,18 @@ uvicorn task3_audio_app.main:app --reload --port 8000
 ```
 
 #### Access the Web Applications:
-* **Applicant Audio Portal:** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* **Live Cloud Deployment:**
+  * **Applicant Audio Portal:** [https://consultbae-assignment.onrender.com/static/index.html](https://consultbae-assignment.onrender.com/static/index.html)
+  * **Recruiter Submissions Dashboard:** [https://consultbae-assignment.onrender.com/static/submissions.html](https://consultbae-assignment.onrender.com/static/submissions.html)
+  * **Interactive API Documentation:** [https://consultbae-assignment.onrender.com/docs](https://consultbae-assignment.onrender.com/docs)
+* **Local Development:**
+  * **Applicant Audio Portal:** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+  * **Recruiter Submissions Dashboard:** [http://127.0.0.1:8000/submissions-ui](http://127.0.0.1:8000/submissions-ui)
+  * **Interactive API Documentation:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+* **Applicant Features:**
   * Enter Full Name and Phone Number.
   * **Option A:** Record live in-browser audio via HTML5 `MediaRecorder` with real-time waveform visualizer, recording timer, and preview playback.
   * **Option B:** Upload an audio file (`.wav`, `.mp3`, `.m4a`, `.ogg`, `.webm`).
-* **Recruiter Submissions Dashboard:** [http://127.0.0.1:8000/submissions-ui](http://127.0.0.1:8000/submissions-ui)
-  * Live dashboard displaying submission timestamps, applicant details, audio duration, sample rate, bitrate, loudness (RMS dBFS), and noise warning tags.
-* **Interactive API Documentation:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 #### Automated Acoustic Extraction & Entity Linking:
 1. **Acoustic Metadata:** Automatically extracts Duration (seconds), Sample Rate (kHz), Bitrate (kbps), Loudness (RMS dBFS), and dynamic noise crest factor ($\text{peak\_dBFS} - \text{loudness\_dBFS} > 15\text{ dB}$).

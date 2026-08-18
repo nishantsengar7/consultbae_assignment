@@ -1,9 +1,3 @@
-"""
-task1_merge/test_merge.py
-=========================
-Comprehensive Test Suite for Task 1: Entity Resolution & Merge Pipeline
-"""
-
 import sys
 import unittest
 import sqlite3
